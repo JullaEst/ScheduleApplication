@@ -3,9 +3,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="593.0" prefWidth="501.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.AddAppointment">
+<AnchorPane prefHeight="586.0" prefWidth="484.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.EditAppointment">
     <children>
-        <Label layoutX="191.0" layoutY="29.0" text="Add Appointment" />
+        <Label layoutX="191.0" layoutY="29.0" text="Edit Appointment" />
         <Button layoutX="178.0" layoutY="565.0" mnemonicParsing="false" text="Save" />
         <Button layoutX="274.0" layoutY="565.0" mnemonicParsing="false" text="Cancel" />
         <GridPane layoutX="60.0" layoutY="74.0" prefHeight="449.0" prefWidth="347.0">

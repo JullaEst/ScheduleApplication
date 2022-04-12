@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ReportsScreen">
+    <children>
+        <Label layoutX="391.0" layoutY="40.0" prefHeight="44.0" prefWidth="81.0" text="Reports">
+            <font>
+                <Font name="Dubai Light" size="24.0" />
+            </font>
+        </Label>
+        <Button fx:id="mainMenu" layoutX="395.0" layoutY="348.0" mnemonicParsing="false" onAction="#onMainMenuButton" text="Main Menu" />
+        <TabPane layoutX="21.0" layoutY="114.0" prefHeight="200.0" prefWidth="825.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Appointment Type by Month" />
+                <Tab text="Contacts Schedule">
+                    <content>
+                        <TableView prefHeight="200.0" prefWidth="200.0">
+                            <columns>
+                                <TableColumn prefWidth="138.0" text="Appt ID" />
+                                <TableColumn prefWidth="93.0" text="Title" />
+                                <TableColumn prefWidth="109.0" text="Description" />
+                                <TableColumn minWidth="8.0" prefWidth="87.0" text="Start Date" />
+                                <TableColumn minWidth="0.0" prefWidth="92.0" text="End Date" />
+                                <TableColumn minWidth="0.0" prefWidth="104.0" text="Start Time" />
+                                <TableColumn minWidth="0.0" prefWidth="89.0" text="End Time" />
+                                <TableColumn minWidth="0.0" prefWidth="92.0" text="Cust ID" />
+                                <TableColumn minWidth="0.0" prefWidth="8.0" text="C2" />
+                            </columns>
+                        </TableView>
+                    </content>
+                </Tab>
+                <Tab text="Vendors Information" />
+            </tabs>
+        </TabPane>
+    </children>
+</AnchorPane>
