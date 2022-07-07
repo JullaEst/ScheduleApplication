@@ -1,1 +1,33 @@
+public class Country  {
+    public int countryId;
+    public String countryName;
+    private int countryIdName;
+
+    /**
+     * Country Class creates country objects and assigns values to object
+     */
+    public Country(int countryId, String countryName) {
+        this.countryId = countryId;
+        this.countryName = countryName;
+    }
+    //gets country id
+    public int getCountryId() {
+        return countryId;
+    }
+
+    public String getCountryName() {
+        return countryName;
+    }
+
+    /*public String getCountryIdName(){
+        this.countryIdName = countryIdName;
+        return countryIdName;
+    } */
+
+    //country name to string
+    @Override
+    public String toString(){
+        return countryName;
+    }
+}
 
