@@ -29,9 +29,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
+/**
+ * Reports Screen controller handles the reports for the Contacts, Customers, and Appointment type by month
+ */
 public class ReportsScreen implements Initializable {
 
+    //creates a list of month names
     private static final ObservableList<String> monthsList = FXCollections.observableArrayList("January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December");
     private static final ObservableList<Month>  monthListTwo = FXCollections.observableArrayList();
@@ -65,30 +70,36 @@ public class ReportsScreen implements Initializable {
 
     public Label typeMonthLabel;
     public ComboBox<Month> monthComboBox;
-
     public TableView <Reports> apptTypeTable;
-
     public TableColumn <Reports, String> apptTypeCol;
     public TableColumn <Reports, Integer> totalCol;
-
     public Button mainScreenButton;
 
     Stage stage;
     Parent scene;
     private int monthName;
 
-
+    //combo box list of customers
     public void onCustomersButton(ActionEvent event) {
-
+        //selects customer from combo box
         Customers customer = (Customers) customersButton.getSelectionModel().getSelectedItem();
 
         int customerId = customer.getCustomerID();
+        /**
+         * LAMBDA expression:
+         * creates a list of customer appointments by customer id
+         * @param event
+         * @throws IOException
+         *
+         */
+        //ObservableList<Appointments> customerAppt = AppointmentsDB.getCustomerAppt(customerId);
+        ObservableList<Appointments> customerAppt = FXCollections.observableArrayList(AppointmentsDB.getAllAppointments().stream()
+                .filter(appointments -> customerId == appointments.getCustomerId() ).collect(Collectors.toList()));
 
-        ObservableList<Appointments> customerAppt = AppointmentsDB.getCustomerAppt(customerId);
-
+        //Alert pop up if there is no appointments for selected customer
         if (customerAppt.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("No Appointments for Selected Contact.");
+            alert.setTitle("No Appointments for Selected Customer.");
             alert.setHeaderText(null);
             alert.setContentText("No appointments for selected customer, please choose another customer.");
 
@@ -98,15 +109,13 @@ public class ReportsScreen implements Initializable {
         }
 
     }
-
+    //selects contact from contacts list combo box
     public void onContactsButton(ActionEvent event) {
 
         Contacts contact = (Contacts) contactsButton.getSelectionModel().getSelectedItem();
-
         int contactId = contact.getContactId();
-
         ObservableList<Appointments> contactAppt = AppointmentsDB.getContactAppt(contactId);
-
+        //Alert pop up if there are no appointments for selected contact
         if (contactAppt.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("No Appointments for Selected Contact.");
@@ -119,15 +128,15 @@ public class ReportsScreen implements Initializable {
         }
 
     }
-
+    //selects month name from month combox and shows how many appointment types for each month
     public void onMonthComboBox(ActionEvent event) {
         int monthNumber = monthComboBox.getValue().getValue(); //numeric value of the month(1-12)
-
         ObservableList<Reports> monthApptType = ReportsDB.getMonthType(monthNumber);
 
+        //Alert pop up if there are no appointment types for selected month
         if(monthApptType.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("No Appointments for Selected Contact.");
+            alert.setTitle("No Appointments for Selected Month.");
             alert.setHeaderText(null);
             alert.setContentText("No appointments for selected month, please choose another month.");
 
@@ -142,29 +151,7 @@ public class ReportsScreen implements Initializable {
 
     }
 
-
-        /*Appointments appointment = (Appointments) monthButton.getSelectionModel().getSelectedItem();
-
-        int apptId = appointment.getApptId();
-
-        ObservableList<Appointments> monthType = AppointmentsDB.getMonthType(apptId);
-
-        if(monthType.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("No Appointments for Selected Contact.");
-            alert.setHeaderText(null);
-            alert.setContentText("No appointments for selected customer, please choose another customer.");
-
-            alert.showAndWait();
-        } else {
-            apptTypeTable.setItems(monthType);
-        }
-    }
-
-    public void onApptTypeTable(SortEvent<TableView> tableViewSortEvent) {
-    }
-}*/
-
+    //directs user to main menu
     public void onMainScreenButton(ActionEvent event) throws IOException {
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         Object scene = FXMLLoader.load(getClass().getResource("/View/MainMenu.fxml"));
@@ -174,7 +161,7 @@ public class ReportsScreen implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
+        //sets information in columns for contacts table and customers table
 
         contactsTable.setItems(AppointmentsDB.getAllAppointments());
         customersTable.setItems(AppointmentsDB.getAllAppointments());
@@ -199,8 +186,9 @@ public class ReportsScreen implements Initializable {
         customersContactCol.setCellValueFactory(new PropertyValueFactory<>("Contact"));
         customersCustCol.setCellValueFactory(new PropertyValueFactory<>("CustomerId"));
 
-
+        //sets list of contacts
         contactsButton.setItems(ContactsDB.getAllContacts());
+        //sets list of customers
         customersButton.setItems(CustomersDB.getAllCustomers());
 
         apptTypeCol.setCellValueFactory((new PropertyValueFactory<>("apptType")));
@@ -209,11 +197,13 @@ public class ReportsScreen implements Initializable {
 
         //monthComboBox.setItems(monthsList);
 
-        for(int i = 1; i < 13; i++) {
+        for(int i = 1; i < 13; i++) { //month name list
             System.out.println(LocalDate.of(2022, i, 1).getMonth());
             monthListTwo.add(LocalDate.of(2022, i, 1).getMonth());
         }
+        //sets month list
         monthComboBox.setItems(monthListTwo);
+        //gets selected month name
         monthComboBox.getSelectionModel().selectFirst();
     }
 
