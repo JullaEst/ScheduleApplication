@@ -1,1 +1,173 @@
+package Controller;
+
+import DBAccess.CountryDB;
+import DBAccess.CustomersDB;
+import DBAccess.DivisionsDB;
+import Model.Contacts;
+import Model.Country;
+import Model.Customers;
+import Model.Divisions;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.EventObject;
+import java.util.ResourceBundle;
+
+import static DBAccess.CountryDB.*;
+
+public class EditCustomer implements Initializable {
+
+    public TextField editName;
+    public TextField editAddress;
+    public TextField editZipCode;
+    public TextField editPhoneNumber;
+    public ComboBox <Divisions> editDivisionId;
+    public ComboBox <Country> editCountryId;
+
+    public Button saveButton;
+    public Button cancelButton;
+    public TextField editCustomerId;
+
+    Stage stage;
+    Parent scene;
+    private int customerId;
+
+    public void onEditName(ActionEvent event) {
+    }
+
+    public void onEditAddress(ActionEvent event) {
+    }
+
+    public void onEditZipCode(ActionEvent event) {
+    }
+
+    public void onEditPhoneNumber(ActionEvent event) {
+    }
+
+    public void onEditDivisionId(ActionEvent event) {
+        /*Divisions selectedDivision = editDivisionId.getValue();
+        editDivisionId.setItems(DivisionsDB.getAllDivisions(selectedDivision.getDivisionId()));
+
+         */
+    }
+
+    public void onEditCountryId(ActionEvent event) throws SQLException {
+        Country selectedCountry = editCountryId.getValue();
+        editDivisionId.setItems(DivisionsDB.getAllDivisions(selectedCountry.getCountryId()));
+    }
+
+    public void onSaveButton(ActionEvent event) throws IOException {
+        int customerId = Integer.parseInt(editCustomerId.getText());
+        String name = editName.getText();
+        String address = editAddress.getText();
+        String zipcode = editZipCode.getText();
+        String phoneNumber = editPhoneNumber.getText();
+
+        Divisions divisionId = editDivisionId.getValue();
+        Country countryId = editCountryId.getValue();
+
+        if(editName.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Name can not be blank");
+            alert.show();
+            return;
+        }
+
+        if(editAddress.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Address can not be blank");
+            alert.show();
+            return;
+        }
+
+        if(editZipCode.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Zip code can not be blank");
+            alert.show();
+            return;
+        }
+
+        if(editPhoneNumber.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Phone Number can not be blank");
+            alert.show();
+            return;
+
+        } else {
+            Customers modCustomer = new Customers(customerId,name, address, zipcode, phoneNumber, divisionId.getDivisionId(), countryId.getCountryId());
+            CustomersDB.editCustomer(modCustomer);
+
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+            Parent scene = FXMLLoader.load(getClass().getResource("/View/CustomerScreen.fxml"));
+            stage.setScene(new Scene(scene));
+            stage.show();
+        }
+    }
+
+
+    public void onCancelButton(ActionEvent event) throws IOException {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Do you want to ignore your changes?",
+                ButtonType.OK,
+                ButtonType.CANCEL);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                Parent editCustomer = null;
+
+                try {
+                    editCustomer = FXMLLoader.load(getClass().getResource("/View/CustomerScreen.fxml"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Scene partScene = new Scene(editCustomer);
+
+                Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+                window.setScene(partScene);
+                window.show();
+
+            }
+
+        });
+    }
+
+
+    public void sendCustomer(Customers customerSelected) throws SQLException {
+
+        editCustomerId.setText(String.valueOf(customerSelected.getCustomerID()));
+        editName.setText(String.valueOf(customerSelected.getCustomerName()));
+        editAddress.setText(String.valueOf(customerSelected.getCustomerAddress()));
+        editZipCode.setText(String.valueOf(customerSelected.getCustomerZipCode()));
+        editPhoneNumber.setText(String.valueOf(customerSelected.getCustomerPhoneNumber()));
+        editDivisionId.setItems(DivisionsDB.getAllDivisions(customerSelected.getDivisionID())); //fixme replace getdivisionID with countryID. divisionID doesnt match countryID
+        //editCountryId.setValue(CountryDB.getAllCountry(customerSelected.getCountryID()));
+
+
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        //editDivisionId.setItems(DivisionsDB.getAllDivisions());
+        editCountryId.setItems(CountryDB.getAllCountry());
+
+    }
+
+    public void onEditCustomerId(ActionEvent event) {
+    }
+}
+
+
 
