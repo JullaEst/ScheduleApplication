@@ -26,6 +26,11 @@ import java.util.EventObject;
 import java.util.ResourceBundle;
 
 import static DBAccess.CountryDB.*;
+/**
+ * Controller contains class and methods for the user to edit a customer.
+ * The Controller also validates if the appointment is outside office hours
+ * or overlapping with existing appointments.
+ */
 
 public class EditCustomer implements Initializable {
 
@@ -62,12 +67,12 @@ public class EditCustomer implements Initializable {
 
          */
     }
-
+    //selects country from country list combo box
     public void onEditCountryId(ActionEvent event) throws SQLException {
         Country selectedCountry = editCountryId.getValue();
         editDivisionId.setItems(DivisionsDB.getAllDivisions(selectedCountry.getCountryId()));
     }
-
+    //saves modified customer information
     public void onSaveButton(ActionEvent event) throws IOException {
         int customerId = Integer.parseInt(editCustomerId.getText());
         String name = editName.getText();
@@ -78,27 +83,28 @@ public class EditCustomer implements Initializable {
         Divisions divisionId = editDivisionId.getValue();
         Country countryId = editCountryId.getValue();
 
+        //Error pop up if Name is blank
         if(editName.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Name can not be blank");
             alert.show();
             return;
         }
-
+        //Error pop up if Address is blank
         if(editAddress.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Address can not be blank");
             alert.show();
             return;
         }
-
+        //Error pop up if Zipcode is blank
         if(editZipCode.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Zip code can not be blank");
             alert.show();
             return;
         }
-
+        //Error pop up if Phone number is blank
         if(editPhoneNumber.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Phone Number can not be blank");
@@ -106,6 +112,7 @@ public class EditCustomer implements Initializable {
             return;
 
         } else {
+            //customer modifications are created and directs back to Customer screen
             Customers modCustomer = new Customers(customerId,name, address, zipcode, phoneNumber, divisionId.getDivisionId(), countryId.getCountryId());
             CustomersDB.editCustomer(modCustomer);
 
@@ -116,7 +123,7 @@ public class EditCustomer implements Initializable {
         }
     }
 
-
+    //cancels customer modifications and directs back to Customer screen
     public void onCancelButton(ActionEvent event) throws IOException {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Do you want to ignore your changes?",
                 ButtonType.OK,
@@ -146,7 +153,7 @@ public class EditCustomer implements Initializable {
 
 
     public void sendCustomer(Customers customerSelected) throws SQLException {
-
+        //collects customer information to modify
         editCustomerId.setText(String.valueOf(customerSelected.getCustomerID()));
         editName.setText(String.valueOf(customerSelected.getCustomerName()));
         editAddress.setText(String.valueOf(customerSelected.getCustomerAddress()));
@@ -161,13 +168,10 @@ public class EditCustomer implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //editDivisionId.setItems(DivisionsDB.getAllDivisions());
-        editCountryId.setItems(CountryDB.getAllCountry());
+        editCountryId.setItems(CountryDB.getAllCountry()); //sets country id list
 
     }
 
     public void onEditCustomerId(ActionEvent event) {
     }
 }
-
-
-
