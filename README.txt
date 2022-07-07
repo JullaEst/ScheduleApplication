@@ -1,4 +1,4 @@
-Descrtion:
+Description:
 C195 Software II - QAM2 Task 1: Java Application Development. The purpose of this project is to develop a a GUI-base scheduling desktop application
 
 Author:
