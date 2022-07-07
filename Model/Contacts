@@ -1,1 +1,39 @@
+package Model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+/**
+ * Contacts Class creates contact objects and assigns values to object
+ */
+public class Contacts {
+    public int contactId;
+    public String contactName;
+    public String contactEmail;
+
+
+    public Contacts(int contactId, String contactName, String contactEmail) {
+        this.contactId = contactId;
+        this.contactName = contactName;
+        this.contactEmail = contactEmail;
+
+    }
+
+    //gets contact id
+    public int getContactId() {
+        return contactId;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    //string for contact id and contact name
+    @Override
+    public String toString(){
+        return "["+ contactId + "] " +contactName;
+    }
+}
