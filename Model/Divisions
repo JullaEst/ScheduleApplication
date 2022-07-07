@@ -1,1 +1,33 @@
+package Model;
+/**
+ * Customers Class creates customer objects and assigns values to object
+ */
+public class Divisions {
 
+    private int divisionId;
+    private String divisionName;
+    private int countryId;
+
+    public Divisions(int divisionId, String divisionName, int countryId) {
+        this.divisionId = divisionId;
+        this.divisionName = divisionName;
+        this.countryId = countryId;
+    }
+    //gets division id
+    public int getDivisionId() {
+        return divisionId;
+    }
+
+    public String getDivisionName() {
+        return divisionName;
+    }
+    //gets country id
+    public int getCountryId() {
+        return countryId;
+    }
+    //division name to string
+    @Override
+    public String toString(){
+        return divisionName;
+    }
+}
