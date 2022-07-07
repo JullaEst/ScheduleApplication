@@ -1,31 +1,39 @@
 package Controller;
 
 import Credentials.Credentials;
+import DBAccess.AppointmentsDB;
 import DBAccess.UsersDB;
+import Model.Appointments;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+/**
+ * Login controller handles the user's login information, text prompt for login screen,
+ * verifies if user has an appointment within 15 minutes, records the login activity
+ * and user is able to exit out of the program.
+ */
+
 public class LogIn implements Initializable {
 
     public TextField userLocation;
+    public Label loginLabel;
     @FXML
     private Button exitButton;
 
@@ -40,62 +48,101 @@ public class LogIn implements Initializable {
 
     private ResourceBundle rb = ResourceBundle.getBundle("Language/login", Locale.getDefault());
 
+    //String name for recording login in activity
+    String filename = "login_activity";
+    private boolean successLogin;
+
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        //ResourceBundle rb = ResourceBundle.getBundle("Language/login", Locale.getDefault());
+        //sets prompt text on login screen
+        usernameText.setPromptText(rb.getString("username"));
+        passwordText.setPromptText(rb.getString("password"));
 
-        usernameText.setText(rb.getString("username"));
-        passwordText.setText(rb.getString("password"));
-
+        //sets buttons on login screen
+        loginLabel.setText(rb.getString("loginButton"));
         loginButton.setText(rb.getString("loginButton"));
         exitButton.setText(rb.getString("exitButton"));
 
-
-        userLocation.setText(ZoneId.systemDefault().toString());  //sets time zone and location based on user
+        //sets time zone and location based on user
+        userLocation.setText(ZoneId.systemDefault().toString());
         System.out.println("I am initialized!");
     }
 
+    //verifies user's login input
     public void onLoginButton(javafx.event.ActionEvent actionEvent) throws IOException, SQLException {
 
         String userName = usernameText.getText();
         String password = passwordText.getText();
+
         int userId = UsersDB.verifyLogin(userName, password);
 
-        Locale.setDefault(new Locale("en")); //set back to english
-
-        if(Credentials.validate(usernameText.getText(), passwordText.getText())){
-
-            UsersDB.verifyLogin(usernameText.getText(), passwordText.getText());
-
-            Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
-            Object scene = FXMLLoader.load(getClass().getResource("/View/MainMenu.fxml"));
-            stage.setScene(new Scene((Parent) scene));
-            stage.show();
-
+        if(userId > 0) {
+            successLogin = true;
         } else {
-            if(!Credentials.validate(usernameText.getText(), passwordText.getText()) && Locale.getDefault().getDisplayLanguage().equals("fr")){
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("loginTitle")));
-                alert.setHeaderText((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("headerText")));
-                alert.setContentText((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("loginText")));
-                alert.show();
-                return;
-
-            }else{
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("loginTitle")));
-                alert.setHeaderText((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("headerText")));
-                alert.setContentText((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("loginText")));
-                alert.show();
-                return;
-            }
-
+            successLogin = false;
         }
+
+        loginActivity();
+
+        //checks if there is an appointment within 15 minutes of logging in
+        if(successLogin){
+
+            try {
+                ObservableList<Appointments> getAllAppointments = AppointmentsDB.getAllAppointments();
+                LocalDateTime timeMinus15 = LocalDateTime.now().minusMinutes(15);
+                LocalDateTime timePlus15 = LocalDateTime.now().plusMinutes(15);
+
+                int getAppointmentID = 0;
+                LocalDateTime displayTime = null;
+
+                boolean appointmentWithin15Min = false;
+
+                for (Appointments appointment : getAllAppointments) {
+                    LocalDateTime startTime = appointment.getStartTime();
+                    if ((startTime.isAfter(timeMinus15) || startTime.isEqual(timeMinus15)) && (startTime.isBefore(timePlus15) || (startTime.isEqual(timePlus15)))) {
+                        getAppointmentID = appointment.getApptId();
+                        displayTime = startTime;
+                        appointmentWithin15Min = true;
+                    }
+                }
+                if (appointmentWithin15Min != false) {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Appointment within 15 minutes: " + getAppointmentID + " and appointment start time of: " + displayTime);
+                    Optional<ButtonType> confirmation = alert.showAndWait();
+                    System.out.println("There is an appointment within 15 minutes");
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "No upcoming appointments.");
+                    Optional<ButtonType> confirmation = alert.showAndWait();
+                    System.out.println("No upcoming appointments within 15 minutes");
+                }
+
+                //sets back to english
+                Locale.setDefault(new Locale("en"));
+
+                //directs to main menu screen
+                Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
+                Object scene = FXMLLoader.load(getClass().getResource("/View/MainMenu.fxml"));
+                stage.setScene(new Scene((Parent) scene));
+                stage.show();
+
+
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("loginTitle")));
+            alert.setHeaderText((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("headerText")));
+            alert.setContentText((ResourceBundle.getBundle("Language/login", Locale.getDefault()).getString("loginText")));
+            alert.show();
+            return;
+        }
+
 
     }
 
-
+    //exits program when exit button is pressed
     public void onExitButton(ActionEvent actionEvent) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Exit Confirmation");
@@ -115,5 +162,37 @@ public class LogIn implements Initializable {
     }
 
     public void onZoneId(ActionEvent event) {
+    }
+
+    public void loginActivity() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss.nnnnnnn z");
+       ZonedDateTime localZDT = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+       ZonedDateTime utcZDT = localZDT.withZoneSameInstant(ZoneId.of("UTC")); //local time in utc
+        //String timeFormat = "HH:mm:ss";
+        //DateTimeFormatter timeFormatColon = DateTimeFormatter.ofPattern(timeFormat);
+        //LocalTime currentTime = LocalTime.now();
+        try {
+            File newlog = new File(filename);
+            if (newlog.createNewFile())
+                System.out.println("Log file created");
+            else
+                System.out.println("Log file already created ");
+
+            
+            FileWriter fw = new FileWriter(filename, true);
+            PrintWriter outputFile = new PrintWriter(fw);
+            
+            if (successLogin) {
+                //Successful login
+                outputFile.println("Successful Login attempt by Username: " + usernameText.getText() +  " at Date & Time "  + dtf.format(utcZDT));
+            }
+            //Failed login
+            else {
+                outputFile.println("Failed Login attempt by Username: " + usernameText.getText()  + " at Date & Time "  + dtf.format(utcZDT));
+            }
+            outputFile.close();
+        }
+        catch (IOException e){ e.printStackTrace();}
+
     }
 }
