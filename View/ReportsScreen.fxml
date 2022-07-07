@@ -1,39 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ReportsScreen">
+<AnchorPane prefHeight="618.0" prefWidth="925.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ReportsScreen">
     <children>
-        <Label layoutX="391.0" layoutY="40.0" prefHeight="44.0" prefWidth="81.0" text="Reports">
-            <font>
-                <Font name="Dubai Light" size="24.0" />
-            </font>
-        </Label>
-        <Button fx:id="mainMenu" layoutX="395.0" layoutY="348.0" mnemonicParsing="false" onAction="#onMainMenuButton" text="Main Menu" />
-        <TabPane layoutX="21.0" layoutY="114.0" prefHeight="200.0" prefWidth="825.0" tabClosingPolicy="UNAVAILABLE">
-            <tabs>
-                <Tab text="Appointment Type by Month" />
-                <Tab text="Contacts Schedule">
-                    <content>
-                        <TableView prefHeight="200.0" prefWidth="200.0">
-                            <columns>
-                                <TableColumn prefWidth="138.0" text="Appt ID" />
-                                <TableColumn prefWidth="93.0" text="Title" />
-                                <TableColumn prefWidth="109.0" text="Description" />
-                                <TableColumn minWidth="8.0" prefWidth="87.0" text="Start Date" />
-                                <TableColumn minWidth="0.0" prefWidth="92.0" text="End Date" />
-                                <TableColumn minWidth="0.0" prefWidth="104.0" text="Start Time" />
-                                <TableColumn minWidth="0.0" prefWidth="89.0" text="End Time" />
-                                <TableColumn minWidth="0.0" prefWidth="92.0" text="Cust ID" />
-                                <TableColumn minWidth="0.0" prefWidth="8.0" text="C2" />
-                            </columns>
-                        </TableView>
-                    </content>
-                </Tab>
-                <Tab text="Vendors Information" />
-            </tabs>
-        </TabPane>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <Label fx:id="customersLabel" layoutX="343.0" layoutY="211.0" prefHeight="27.0" prefWidth="240.0" text="Customers Schedule Report">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <ComboBox fx:id="customersButton" layoutX="768.0" layoutY="209.0" onAction="#onCustomersButton" prefHeight="31.0" prefWidth="136.0" promptText="Customers" />
+                          <TableView fx:id="contactsTable" layoutX="22.0" layoutY="71.0" prefHeight="120.0" prefWidth="882.0">
+                              <columns>
+                                  <TableColumn fx:id="contactsIdCol" prefWidth="71.0" text="Appt ID" />
+                                  <TableColumn fx:id="contactsTitleCol" text="Title" />
+                                  <TableColumn fx:id="contactsDescriptionCol" prefWidth="108.20001220703125" text="Description" />
+                                  <TableColumn fx:id="contactsLocationCol" prefWidth="107.4000244140625" text="Location" />
+                                  <TableColumn fx:id="contactsStartCol" minWidth="1.0" prefWidth="117.60003662109375" text="Start " />
+                                  <TableColumn fx:id="contactsEndCol" prefWidth="99.20001220703125" text="End " />
+                                 <TableColumn fx:id="contactsTypeCol" prefWidth="128.0" text="Appt Type" />
+                                  <TableColumn fx:id="contactsContactCol" prefWidth="85.0" text="Contact" />
+                                 <TableColumn fx:id="contactsCustCol" prefWidth="81.0" text="Cust ID" />
+                              </columns>
+                          </TableView>
+                          <ComboBox fx:id="contactsButton" layoutX="767.0" layoutY="25.0" onAction="#onContactsButton" prefHeight="31.0" prefWidth="136.0" promptText="Contacts" />
+                  <Label fx:id="contactsLabel" layoutX="350.0" layoutY="25.0" prefHeight="27.0" prefWidth="240.0" text="Contacts Schedule Report">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <Button fx:id="mainScreenButton" layoutX="816.0" layoutY="563.0" mnemonicParsing="false" onAction="#onMainScreenButton" prefHeight="31.0" prefWidth="87.0" text="Main Screen" />
+      <TableView fx:id="customersTable" layoutX="22.0" layoutY="252.0" prefHeight="120.0" prefWidth="882.0">
+         <columns>
+            <TableColumn fx:id="customersIdCol" prefWidth="69.0" text="Appt ID" />
+            <TableColumn fx:id="customersTitleCol" prefWidth="82.0" text="Title" />
+            <TableColumn fx:id="customersDescriptionCol" prefWidth="108.20001220703125" text="Description" />
+            <TableColumn fx:id="customersLocationCol" prefWidth="108.60003662109375" text="Location" />
+            <TableColumn fx:id="customersStartCol" minWidth="1.0" prefWidth="105.800048828125" text="Start " />
+            <TableColumn fx:id="customersEndCol" prefWidth="117.19998168945312" text="End " />
+            <TableColumn fx:id="customersTypeCol" prefWidth="119.5999755859375" text="Appt Type" />
+            <TableColumn fx:id="customersContactCol" prefWidth="91.0" text="Contact" />
+            <TableColumn fx:id="customersCustCol" prefWidth="76.0" text="Cust ID" />
+         </columns>
+      </TableView>
+      <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+                  <Label fx:id="typeMonthLabel" layoutX="88.0" layoutY="383.0" prefHeight="26.0" prefWidth="163.0" text="Appt Type by Month">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <ComboBox fx:id="monthComboBox" layoutX="300.0" layoutY="490.0" onAction="#onMonthComboBox" prefHeight="26.0" prefWidth="127.0" promptText="Month" />
+      <TableView fx:id="apptTypeTable" layoutX="78.0" layoutY="419.0" prefHeight="180.0" prefWidth="184.0">
+        <columns>
+          <TableColumn fx:id="apptTypeCol" prefWidth="98.0" text="Appt Type" />
+          <TableColumn fx:id="totalCol" prefWidth="104.0" text="Total" />
+        </columns>
+      </TableView>
     </children>
 </AnchorPane>
+
