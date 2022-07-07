@@ -1,1 +1,40 @@
+package Model;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+/**
+ * Users Class creates user objects and assigns values to object
+ */
+public class Users {
+    public int userId;
+    public String userName;
+    public String password;
+
+
+    public Users(int userId, String userName, String password) {
+        this.userId = userId;
+        this.userName = userName;
+        this.password = password;
+    }
+    //gets user id
+    public int getUserId() {
+        return userId;
+    }
+    //gets user name
+    public String getUserName() {
+        return userName;
+    }
+    //gets password
+    public String getPassword() {
+        return password;
+
+    }
+    // country name to string
+    @Override
+    public String toString(){
+        return userName;
+    }
+}
+
 
