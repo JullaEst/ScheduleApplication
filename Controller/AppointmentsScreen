@@ -88,6 +88,7 @@ public class AppointmentsScreen implements Initializable {
 
     //Edit Button directs to the Edit Appointment screen
     public void onEditButton(ActionEvent event) throws IOException {
+        //selects appointment to edit
         if(viewApptList.getSelectionModel().getSelectedItem() != null) {
             Appointments selectedAppt;
             selectedAppt = (Appointments) viewApptList.getSelectionModel().getSelectedItem();
@@ -109,7 +110,7 @@ public class AppointmentsScreen implements Initializable {
 
     //When Delete button is clicked an appointment will be deleted from the database
     public void onDeleteButton(ActionEvent event) throws IOException {
-
+        //selects appointment to delete
         Appointments a = viewApptList.getSelectionModel().getSelectedItem();
 
         if(a != null)
@@ -150,6 +151,7 @@ public class AppointmentsScreen implements Initializable {
     }
 
 
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //deleteApptTable();
@@ -169,6 +171,7 @@ public class AppointmentsScreen implements Initializable {
         endTimeCol.setCellValueFactory(new PropertyValueFactory<>("EndTime"));
         customerIdCol.setCellValueFactory(new PropertyValueFactory<>("CustomerId"));
         userIdCol.setCellValueFactory(new PropertyValueFactory<>("UserId"));
+
     }
 
 }
