@@ -24,14 +24,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.*;
-import java.time.chrono.ChronoZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 /**
  * Controller contains class and methods for the user to add appointments.
  * The Controller also validates if the appointment is outside office hours
- * or overlapping with exisitng appointments.
+ * or overlapping with existing appointments.
  */
 public class AddAppointment implements Initializable {
 
@@ -106,11 +107,11 @@ public class AddAppointment implements Initializable {
     public void onAddUserId(ActionEvent event) {
     }
 
-    /**
-     * Appointment is added to the database when the form is properly completed.
-     */
+    //Appointment is added to the database when the form is properly completed.
+
     public void onAddSaveButton(ActionEvent event) throws IOException, SQLException {
 
+        //gets data from form
         int apptId = 0;
         String title = addTitle.getText();
         System.out.println("title =" + title);
@@ -135,16 +136,16 @@ public class AddAppointment implements Initializable {
         Users user = addUserId.getValue();
 
 
-        Contacts contId = ContactsDB.getContactIdByName(addContact.getSelectionModel().getSelectedItem());
+        //Contacts contId = ContactsDB.getContactIdByName(addContact.getSelectionModel().getSelectedItem());
 
         try {
-            if (validateAppointment()) {
+            if (validateAppointment()) { //if form is filled correctly the new appointment will be made and appear on Appointment Screen
 
                 Appointments newAppointment = new Appointments(apptId, title, description, location, contact.getContactId(), type, startDateTime, endDateTime, customer.getCustomerID(), user.getUserId());
                 AppointmentsDB.addAppointment(newAppointment);
 
                 Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                Parent scene = FXMLLoader.load(getClass().getResource("/View/AddAppointment.fxml"));
+                Parent scene = FXMLLoader.load(getClass().getResource("/View/AppointmentsScreen.fxml"));
                 stage.setScene(new Scene(scene));
                 stage.show();
 
@@ -155,9 +156,16 @@ public class AddAppointment implements Initializable {
 
     }
 
-    //return false;
 
     //Cancels appointment addition and directs back to Appointment Screen
+
+    /**
+     * LAMBDA expression:
+     * Responses to alert box and transfers program control to previous form, this simplifies the code to return back to previous screen
+     * @param event
+     * @throws IOException
+     *
+     */
     public void onCancelButton(ActionEvent event) throws IOException {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Do you want to ignore your changes?",
                 ButtonType.OK,
@@ -174,9 +182,7 @@ public class AddAppointment implements Initializable {
                 }
 
                 Scene partScene = new Scene(addAppointment);
-
                 Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
                 window.setScene(partScene);
                 window.show();
 
@@ -186,9 +192,7 @@ public class AddAppointment implements Initializable {
     }
 
 
-    /**
-     * Sets initial conditions of the columns in the table view and prepopulating comboboxes
-     **/
+    //Sets initial conditions of the columns in the table view and prepopulates comboboxes
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         addApptType.setItems(Appointments.typesList);
@@ -244,21 +248,21 @@ public class AddAppointment implements Initializable {
             alert.show();
             return false;
         }
-
+        //Error pop up if Date is not selected
         if (addDate.getValue() == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Please choose a date");
             alert.show();
             return false;
         }
-
+        //Error pop up if Appointment Type is not selected
         if (addStartTime.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Start time can not be blank");
             alert.show();
             return false;
         }
-
+        //Error pop up if End Time is not entered
         if (addEndTime.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("End time can not be blank");
@@ -268,7 +272,8 @@ public class AddAppointment implements Initializable {
 
 
         //Error pop up if Customer Id is not selected
-        if (addCustomerId.getValue() == null) {
+        Customers customer = addCustomerId.getValue();
+        if (customer == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Please choose a Customer ID");
             alert.show();
@@ -284,240 +289,98 @@ public class AddAppointment implements Initializable {
 
         }
 
-        //check if appointment time is outside office hours
-        if(AppointmentsDB.validateApptTime(newAppointment)){
 
+        //check if appointment time is outside office hours
+
+        LocalDate localStartDate = addDate.getValue();
+        LocalDate localEndDate = addDate.getValue();
+
+        DateTimeFormatter minHourFormat = DateTimeFormatter.ofPattern("HH:mm");
+
+        LocalTime localStartTime = LocalTime.parse(addStartTime.getText(), minHourFormat);
+        LocalTime localEndTime = LocalTime.parse(addEndTime.getText(), minHourFormat);
+
+        LocalDateTime dateTimeStart = LocalDateTime.of(localStartDate, localStartTime);
+        LocalDateTime dateTimeEnd = LocalDateTime.of(localEndDate, localEndTime);
+
+        ZonedDateTime zdtStart = ZonedDateTime.of(dateTimeStart, ZoneId.systemDefault());
+        ZonedDateTime zdtEnd = ZonedDateTime.of(dateTimeEnd, ZoneId.systemDefault());
+
+        ZonedDateTime convertESTStart = zdtStart.withZoneSameInstant(ZoneId.of("America/New_York"));
+        ZonedDateTime convertESTEnd = zdtEnd.withZoneSameInstant(ZoneId.of("America/New_York"));
+
+        LocalTime checkStartTime = convertESTStart.toLocalTime();
+        LocalTime checkEndTime = convertESTEnd.toLocalTime();
+
+        LocalTime estStartHours = LocalTime.of(8, 0, 0);
+        LocalTime estEndHours = LocalTime.of(22, 0, 0);
+
+
+        if (checkStartTime.isBefore(estStartHours) || checkStartTime.isAfter(estEndHours) || checkEndTime.isBefore(estStartHours) || checkEndTime.isAfter(estEndHours))
+        {
+            System.out.println("Appointment time outside business hours");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "The time you entered is outside business hours, please enter a new time between 8:00AM to 10:00AM EST");
+            Optional<ButtonType> confirmation = alert.showAndWait();
+            return false;
         }
 
-      //overlap appointment
+        //overlap appointment
         ObservableList<Appointments> currentApptList = FXCollections.observableArrayList();
         currentApptList = AppointmentsDB.getAllAppointments();
 
         for (Appointments appointment : currentApptList) {
-            LocalDate currentDate = appointment.getStartTime().toLocalDate();
+            //LocalDate currentDate = appointment.getStartTime().toLocalDate();
 
-            if (addStartTime.getText().equals(currentDate)) {
-                LocalTime currentStartTime = appointment.getStartTime().toLocalTime();
-                LocalTime currentEndTime = appointment.getEndTime().toLocalTime();
-                LocalTime newStartTime = LocalTime.parse(addStartTime.getText());
-                LocalTime newEndTime = LocalTime.parse(addEndTime.getText());
-
-                if (newStartTime.isBefore(currentStartTime) & newEndTime.isAfter(currentEndTime)) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Appointment Overlap");
-                    alert.setHeaderText("Appointment Error Overlap");
-                    alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
-                            " The appointment you overlap with is");
-                    alert.showAndWait();
-                }
-
-                if (newStartTime.isBefore(currentStartTime) & newEndTime.isAfter(currentEndTime)) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Appointment Overlap");
-                    alert.setHeaderText("Appointment Error Overlap");
-                    alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
-                            " The appointment you overlap with is");
-                    alert.showAndWait();
-                }
-
-                if (newStartTime.isAfter(currentStartTime) || newStartTime.equals(currentStartTime) & (newEndTime.isBefore(currentEndTime) || newEndTime.equals(currentEndTime))) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Appointment Overlap");
-                    alert.setHeaderText("Appointment Error Overlap");
-                    alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
-                            " The appointment you overlap with is");
-                    alert.showAndWait();
-                }
+            if(customer.getCustomerID() != appointment.getCustomerId()){
+                continue; //ends the current iteration in a loop and continues to the next iteration
             }
-        }
 
-        return true;
-
-
-    }
-
-
-
-}
-
-
-
-
-
-/*ZoneId currentZone = ZoneId.systemDefault();
-            ZoneId estZone = ZoneId.of("America/New_York");
-
-        Appointments appt = null;
-
-            ZonedDateTime startZoneDateTime = appt.getStartTime().atZone(estZone);
-            ZonedDateTime endZoneDateTime = appt.getEndTime().atZone(estZone);
-            int year = appt.getStartTime().toLocalDate().getYear();
-            int month = appt.getStartTime().toLocalDate().getMonth().getValue();
-            int day = appt.getStartTime().toLocalDate().getDayOfMonth();
-            int hourAM = 8;
-            int hourPM = 22;
-            int min = 00;
-            int sec = 00;
-
-            LocalDateTime startZTime = LocalDateTime.of(year, month, day, hourAM, hourPM, min, sec);
-            LocalDateTime endZTime = LocalDateTime.of(year, month, day, hourAM, hourPM, min, sec);
-
-            ChronoZonedDateTime zonedStartTime = ZonedDateTime.of(startZTime, estZone);
-            ChronoZonedDateTime zonedEndTime = ZonedDateTime.of(endZTime, estZone);
-
-            System.out.println("ZonedStartTime: " + zonedStartTime);
-            System.out.println("Zone
-            if(dEndTime: " + zonedEndTime);
-
-            if (startZoneDateTime.isBefore(zonedStartTime) || endZoneDateTime.isAfter(zonedEndTime)) {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Appointments");
-                alert.setHeaderText("Appointment is Outside of Office Hours");
-                alert.setContentText("Please enter a new Appointment time, office hours are between 8AM to 10PM EST.");
+            if(dateTimeStart.isBefore(appointment.getStartTime()) && dateTimeEnd.isAfter(appointment.getEndTime())){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Appointment Overlap");
+                alert.setHeaderText("Appointment Error Overlap");
+                alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
+                        " The appointment you overlap with is");
                 alert.showAndWait();
 
                 return false;
-
-        }*/
-
-
-/*
-ObservableList<Appointments> currentAppointments = FXCollections.observableArrayList();
-        currentAppointments = AppointmentsDB.getAllAppointments();
-
-
-        for (Appointments appointment : currentAppointments) {
-            LocalDate currentDate = appointment.getStartTime().toLocalDate();
-
-            if (addDate.getValue().isEqual(currentDate)) {
-                LocalTime currentStart = appointment.getStartTime().toLocalTime();
-                LocalTime currentEnd = appointment.getEndTime().toLocalTime();
-                LocalTime futureStart = LocalTime.parse(addStartTime.getText());
-                LocalTime futureEnd = LocalTime.parse(addEndTime.getText());
-
-                if (futureStart.isBefore(currentStart) & futureEnd.isAfter(currentEnd)) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Appointment Error");
-                    alert.setHeaderText("Appointment Error");
-                    alert.setContentText("Appointment overlap, you can not schedule an appointment that overlaps with another customers appointment." +
-                            " The appointment you overlap with is");
-                    alert.showAndWait();
-                    return false;
-                }
-                if (futureStart.isBefore(currentEnd) & futureEnd.isAfter(currentEnd)) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Appointment overlap");
-                    alert.setHeaderText("Appointment overlap");
-                    alert.setContentText("Appointment overlap, you can not schedule an appointment that overlaps with another customers appointment." +
-                            " The appointment you overlap with is");
-                    alert.showAndWait();
-                    return false;
-                }
-                if ((futureStart.isAfter(currentStart) || futureStart.equals(currentStart)) & (futureEnd.isBefore(currentEnd) || futureEnd.equals(currentEnd))) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Appointment overlap");
-                    alert.setHeaderText("Appointment overlap");
-                    alert.setContentText("Appointment overlap, you can not schedule an appointment that overlaps with another customers appointment." +
-                            " The appointment you overlap with is");
-                    alert.showAndWait();
-                    return false;
-                }
-
- */
-
-/*
-public boolean onAddSaveButton(ActionEvent event) throws IOException {
-
-
-        int apptId = 0;
-        String title = addTitle.getText();
-        System.out.println("title =" + title);
-        String description = addDescription.getText();
-        System.out.println("description = " + description);
-        String location = addLocation.getText();
-        System.out.println("location = " + location);
-
-        Contacts contact = addContact.getValue();
-        //System.out.println("Type = " + type + " Contact = " + contact.getContactId());
-        String type = addApptType.getValue();
-
-        LocalDate date = addDate.getValue();
-        LocalTime startTime = LocalTime.parse(addStartTime.getText());
-        LocalTime endTime = LocalTime.parse(addEndTime.getText());
-        System.out.println("date = " + date + " time = " + startTime);
-        LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
-        System.out.println("Date time is " + startDateTime);
-        LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
-
-        Customers customer = addCustomerId.getValue();
-        Users user = addUserId.getValue();
-
-
-        if (addTitle.getText().isBlank()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Title can not be blank");
-            alert.show();
-            return false;
-        }
-
-        if (addDescription.getText().isBlank()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Description can not be blank");
-            alert.show();
-            return false;
-        }
-
-        if (addLocation.getText().isBlank()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Title can not be blank");
-            alert.show();
-            return false;
-        }
-
-        if (addContact.getValue() == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Please choose a Contact");
-            alert.show();
-            return false;
-        }
-
-        if (addApptType.getValue() == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Please choose an Appointment type");
-            alert.show();
-            return false;
-        }
-
-        if (addCustomerId.getValue() == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Please choose a Customer ID");
-            alert.show();
-            return false;
-        }
-
-        if (addUserId.getValue() == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Please choose a User ID");
-            alert.show();
-            return false;
-
-        }
-
-        else {
-
-                Appointments newAppointment = new Appointments(apptId, title, description, location, contact.getContactId(), type, startDateTime, endDateTime, customer.getCustomerID(), user.getUserId());
-                AppointmentsDB.addAppointment(newAppointment);
-
-                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                Parent scene = FXMLLoader.load(getClass().getResource("/View/AppointmentsScreen.fxml"));
-                stage.setScene(new Scene(scene));
-                stage.show();
-
             }
 
+            if(dateTimeStart.isAfter(appointment.getStartTime()) && dateTimeStart.isBefore(appointment.getEndTime())){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Appointment Overlap");
+                alert.setHeaderText("Appointment Error Overlap");
+                alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
+                        " The appointment you overlap with is");
+                alert.showAndWait();
 
-        return false;
+                return false;
+            }
+
+            if(dateTimeEnd.isAfter(appointment.getStartTime()) && dateTimeEnd.isBefore(appointment.getEndTime())){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Appointment Overlap");
+                alert.setHeaderText("Appointment Error Overlap");
+                alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
+                        " The appointment you overlap with is");
+                alert.showAndWait();
+
+                return false;
+            }
+
+            if(dateTimeEnd.isEqual(appointment.getEndTime()) || dateTimeStart.isEqual(appointment.getStartTime())){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Appointment Overlap");
+                alert.setHeaderText("Appointment Error Overlap");
+                alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
+                        " The appointment you overlap with is");
+                alert.showAndWait();
+
+                return false;
+            }
+
+        }
+        return true;
     }
- */
 
-
+}
