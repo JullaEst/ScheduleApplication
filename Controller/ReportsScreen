@@ -1,1 +1,221 @@
+package Controller;
 
+import DBAccess.AppointmentsDB;
+import DBAccess.ContactsDB;
+import DBAccess.CustomersDB;
+import DBAccess.ReportsDB;
+import Database.JDBC;
+import Model.Appointments;
+import Model.Contacts;
+import Model.Customers;
+import Model.Reports;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.ResourceBundle;
+
+public class ReportsScreen implements Initializable {
+
+    private static final ObservableList<String> monthsList = FXCollections.observableArrayList("January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December");
+    private static final ObservableList<Month>  monthListTwo = FXCollections.observableArrayList();
+    private static JDBC DBConnection;
+
+    public Label contactsLabel;
+    public ComboBox contactsButton;
+    public TableView contactsTable;
+    public TableColumn contactsTitleCol;
+    public TableColumn contactsIdCol;
+    public TableColumn contactsTypeCol;
+    public TableColumn contactsDescriptionCol;
+    public TableColumn contactsStartCol;
+    public TableColumn contactsEndCol;
+    public TableColumn contactsLocationCol;
+    public TableColumn contactsContactCol;
+    public TableColumn contactsCustCol;
+
+    public Label customersLabel;
+    public ComboBox customersButton;
+    public TableView customersTable;
+    public TableColumn customersIdCol;
+    public TableColumn customersTitleCol;
+    public TableColumn customersTypeCol;
+    public TableColumn customersDescriptionCol;
+    public TableColumn customersStartCol;
+    public TableColumn customersEndCol;
+    public TableColumn customersLocationCol;
+    public TableColumn customersContactCol;
+    public TableColumn customersCustCol;
+
+    public Label typeMonthLabel;
+    public ComboBox<Month> monthComboBox;
+
+    public TableView <Reports> apptTypeTable;
+
+    public TableColumn <Reports, String> apptTypeCol;
+    public TableColumn <Reports, Integer> totalCol;
+
+    public Button mainScreenButton;
+
+    Stage stage;
+    Parent scene;
+    private int monthName;
+
+
+    public void onCustomersButton(ActionEvent event) {
+
+        Customers customer = (Customers) customersButton.getSelectionModel().getSelectedItem();
+
+        int customerId = customer.getCustomerID();
+
+        ObservableList<Appointments> customerAppt = AppointmentsDB.getCustomerAppt(customerId);
+
+        if (customerAppt.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("No Appointments for Selected Contact.");
+            alert.setHeaderText(null);
+            alert.setContentText("No appointments for selected customer, please choose another customer.");
+
+            alert.showAndWait();
+        } else {
+            customersTable.setItems(customerAppt);
+        }
+
+    }
+
+    public void onContactsButton(ActionEvent event) {
+
+        Contacts contact = (Contacts) contactsButton.getSelectionModel().getSelectedItem();
+
+        int contactId = contact.getContactId();
+
+        ObservableList<Appointments> contactAppt = AppointmentsDB.getContactAppt(contactId);
+
+        if (contactAppt.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("No Appointments for Selected Contact.");
+            alert.setHeaderText(null);
+            alert.setContentText("No appointments for selected contact, please choose another contact.");
+
+            alert.showAndWait();
+        } else {
+            contactsTable.setItems(contactAppt);
+        }
+
+    }
+
+    public void onMonthComboBox(ActionEvent event) {
+        int monthNumber = monthComboBox.getValue().getValue(); //numeric value of the month(1-12)
+
+        ObservableList<Reports> monthApptType = ReportsDB.getMonthType(monthNumber);
+
+        if(monthApptType.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("No Appointments for Selected Contact.");
+            alert.setHeaderText(null);
+            alert.setContentText("No appointments for selected month, please choose another month.");
+
+            alert.showAndWait();
+        } else {
+            apptTypeTable.setItems(monthApptType);
+
+
+        }
+
+
+
+    }
+
+
+        /*Appointments appointment = (Appointments) monthButton.getSelectionModel().getSelectedItem();
+
+        int apptId = appointment.getApptId();
+
+        ObservableList<Appointments> monthType = AppointmentsDB.getMonthType(apptId);
+
+        if(monthType.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("No Appointments for Selected Contact.");
+            alert.setHeaderText(null);
+            alert.setContentText("No appointments for selected customer, please choose another customer.");
+
+            alert.showAndWait();
+        } else {
+            apptTypeTable.setItems(monthType);
+        }
+    }
+
+    public void onApptTypeTable(SortEvent<TableView> tableViewSortEvent) {
+    }
+}*/
+
+    public void onMainScreenButton(ActionEvent event) throws IOException {
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        Object scene = FXMLLoader.load(getClass().getResource("/View/MainMenu.fxml"));
+        stage.setScene(new Scene((Parent) scene));
+        stage.show();
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+
+
+        contactsTable.setItems(AppointmentsDB.getAllAppointments());
+        customersTable.setItems(AppointmentsDB.getAllAppointments());
+
+        contactsIdCol.setCellValueFactory(new PropertyValueFactory<>("ApptId"));
+        contactsTitleCol.setCellValueFactory(new PropertyValueFactory<>("Title"));
+        contactsDescriptionCol.setCellValueFactory(new PropertyValueFactory<>("Description"));
+        contactsLocationCol.setCellValueFactory(new PropertyValueFactory<>("Location"));
+        contactsStartCol.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
+        contactsEndCol.setCellValueFactory(new PropertyValueFactory<>("EndTime"));
+        contactsTypeCol.setCellValueFactory(new PropertyValueFactory<>("ApptType"));
+        contactsContactCol.setCellValueFactory(new PropertyValueFactory<>("Contact"));
+        contactsCustCol.setCellValueFactory(new PropertyValueFactory<>("CustomerId"));
+
+        customersIdCol.setCellValueFactory(new PropertyValueFactory<>("ApptId"));
+        customersTitleCol.setCellValueFactory(new PropertyValueFactory<>("Title"));
+        customersDescriptionCol.setCellValueFactory(new PropertyValueFactory<>("Description"));
+        customersLocationCol.setCellValueFactory(new PropertyValueFactory<>("Location"));
+        customersStartCol.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
+        customersEndCol.setCellValueFactory(new PropertyValueFactory<>("EndTime"));
+        customersTypeCol.setCellValueFactory(new PropertyValueFactory<>("ApptType"));
+        customersContactCol.setCellValueFactory(new PropertyValueFactory<>("Contact"));
+        customersCustCol.setCellValueFactory(new PropertyValueFactory<>("CustomerId"));
+
+
+        contactsButton.setItems(ContactsDB.getAllContacts());
+        customersButton.setItems(CustomersDB.getAllCustomers());
+
+        apptTypeCol.setCellValueFactory((new PropertyValueFactory<>("apptType")));
+        totalCol.setCellValueFactory(new PropertyValueFactory<>("countTotal"));
+
+
+        //monthComboBox.setItems(monthsList);
+
+        for(int i = 1; i < 13; i++) {
+            System.out.println(LocalDate.of(2022, i, 1).getMonth());
+            monthListTwo.add(LocalDate.of(2022, i, 1).getMonth());
+        }
+        monthComboBox.setItems(monthListTwo);
+        monthComboBox.getSelectionModel().selectFirst();
+    }
+
+
+}
