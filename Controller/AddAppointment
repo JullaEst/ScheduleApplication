@@ -1,1 +1,523 @@
+package Controller;
+
+import DBAccess.AppointmentsDB;
+import DBAccess.ContactsDB;
+import DBAccess.CustomersDB;
+import DBAccess.UsersDB;
+import Model.Appointments;
+import Model.Contacts;
+import Model.Customers;
+import Model.Users;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.net.URL;
+import java.sql.SQLException;
+import java.time.*;
+import java.time.chrono.ChronoZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ResourceBundle;
+
+/**
+ * Controller contains class and methods for the user to add appointments.
+ * The Controller also validates if the appointment is outside office hours
+ * or overlapping with exisitng appointments.
+ */
+public class AddAppointment implements Initializable {
+
+
+    public DatePicker addDate;
+    public ComboBox<Customers> addCustomerId;
+    public ComboBox<Users> addUserId;
+    public ComboBox<Contacts> addContact; //Contacts replaces String
+    public ComboBox<String> addApptType;
+    public Button addSaveButton;
+    public Button addCancelButton;
+
+    //text fields
+    @FXML
+    private TextField addApptID;
+    @FXML
+    private TextField addTitle;
+    @FXML
+    private TextField addDescription;
+    @FXML
+    private TextField addLocation;
+
+    @FXML
+    private TextField addStartTime;
+    @FXML
+    private TextField addEndTime;
+
+    //combo box
+    @FXML
+    public ComboBox<Customers> customerID;
+    @FXML
+    private ComboBox<?> userID;
+
+    //buttons
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button cancelButton;
+
+    Appointments newAppointment;
+
+    public void onAddApptId(ActionEvent event) {
+    }
+
+    public void onAddTitle(ActionEvent event) {
+    }
+
+    public void onAddDescription(ActionEvent event) {
+    }
+
+    public void onAddLocation(ActionEvent event) {
+    }
+
+    public void onAddContact(ActionEvent event) {
+    }
+
+    public void onAddApptType(ActionEvent event) {
+    }
+
+    public void onAddDate(ActionEvent event) {
+    }
+
+    public void onAddStartTime(ActionEvent actionEvent) {
+    }
+
+    public void onAddEndTime(ActionEvent actionEvent) {
+    }
+
+    public void onAddCustomerID(ActionEvent actionEvent) {
+    }
+
+    public void onAddUserId(ActionEvent event) {
+    }
+
+    /**
+     * Appointment is added to the database when the form is properly completed.
+     */
+    public void onAddSaveButton(ActionEvent event) throws IOException, SQLException {
+
+        int apptId = 0;
+        String title = addTitle.getText();
+        System.out.println("title =" + title);
+        String description = addDescription.getText();
+        System.out.println("description = " + description);
+        String location = addLocation.getText();
+        System.out.println("location = " + location);
+
+        Contacts contact = addContact.getValue();
+        //System.out.println("Type = " + type + " Contact = " + contact.getContactId());
+        String type = addApptType.getValue();
+
+        LocalDate date = addDate.getValue();
+        LocalTime startTime = LocalTime.parse(addStartTime.getText());
+        LocalTime endTime = LocalTime.parse(addEndTime.getText());
+        System.out.println("date = " + date + " time = " + startTime);
+        LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+        System.out.println("Date time is " + startDateTime);
+        LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+        Customers customer = addCustomerId.getValue();
+        Users user = addUserId.getValue();
+
+
+        Contacts contId = ContactsDB.getContactIdByName(addContact.getSelectionModel().getSelectedItem());
+
+        try {
+            if (validateAppointment()) {
+
+                Appointments newAppointment = new Appointments(apptId, title, description, location, contact.getContactId(), type, startDateTime, endDateTime, customer.getCustomerID(), user.getUserId());
+                AppointmentsDB.addAppointment(newAppointment);
+
+                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                Parent scene = FXMLLoader.load(getClass().getResource("/View/AddAppointment.fxml"));
+                stage.setScene(new Scene(scene));
+                stage.show();
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //return false;
+
+    //Cancels appointment addition and directs back to Appointment Screen
+    public void onCancelButton(ActionEvent event) throws IOException {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Do you want to ignore your changes?",
+                ButtonType.OK,
+                ButtonType.CANCEL);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                Parent addAppointment = null;
+
+                try {
+                    addAppointment = FXMLLoader.load(getClass().getResource("/View/AppointmentsScreen.fxml"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Scene partScene = new Scene(addAppointment);
+
+                Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+                window.setScene(partScene);
+                window.show();
+
+            }
+
+        });
+    }
+
+
+    /**
+     * Sets initial conditions of the columns in the table view and prepopulating comboboxes
+     **/
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        addApptType.setItems(Appointments.typesList);
+        addContact.setItems(ContactsDB.getAllContacts());
+        addCustomerId.setItems(CustomersDB.getAllCustomers());
+        addUserId.setItems(UsersDB.getAllUsers());
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDateTime.now();
+        addDate.setValue(start.toLocalDate());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
+        addStartTime.setText("" + start.toLocalTime().format(dtf));
+        addEndTime.setText("" + end.toLocalTime().format(dtf));
+    }
+
+
+    private boolean validateAppointment() {
+        //Error pop up if Title is blank
+        if (addTitle.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Title can not be blank");
+            alert.show();
+            return false;
+        }
+
+        //Error pop up if Description is blank
+        if (addDescription.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Description can not be blank");
+            alert.show();
+            return false;
+        }
+
+        //Error pop up if Location is blank
+        if (addLocation.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Title can not be blank");
+            alert.show();
+            return false;
+        }
+
+        //Error pop up if Contact is not selected
+        if (addContact.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose a Contact");
+            alert.show();
+            return false;
+        }
+
+        //Error pop up if Appointment Type is not selected
+        if (addApptType.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose an Appointment type");
+            alert.show();
+            return false;
+        }
+
+        if (addDate.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose a date");
+            alert.show();
+            return false;
+        }
+
+        if (addStartTime.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Start time can not be blank");
+            alert.show();
+            return false;
+        }
+
+        if (addEndTime.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("End time can not be blank");
+            alert.show();
+            return false;
+        }
+
+
+        //Error pop up if Customer Id is not selected
+        if (addCustomerId.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose a Customer ID");
+            alert.show();
+            return false;
+        }
+
+        //Error pop up if User Id is not selected
+        if (addUserId.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose a User ID");
+            alert.show();
+            return false;
+
+        }
+
+        //check if appointment time is outside office hours
+        if(AppointmentsDB.validateApptTime(newAppointment)){
+
+        }
+
+      //overlap appointment
+        ObservableList<Appointments> currentApptList = FXCollections.observableArrayList();
+        currentApptList = AppointmentsDB.getAllAppointments();
+
+        for (Appointments appointment : currentApptList) {
+            LocalDate currentDate = appointment.getStartTime().toLocalDate();
+
+            if (addStartTime.getText().equals(currentDate)) {
+                LocalTime currentStartTime = appointment.getStartTime().toLocalTime();
+                LocalTime currentEndTime = appointment.getEndTime().toLocalTime();
+                LocalTime newStartTime = LocalTime.parse(addStartTime.getText());
+                LocalTime newEndTime = LocalTime.parse(addEndTime.getText());
+
+                if (newStartTime.isBefore(currentStartTime) & newEndTime.isAfter(currentEndTime)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Appointment Overlap");
+                    alert.setHeaderText("Appointment Error Overlap");
+                    alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
+                            " The appointment you overlap with is");
+                    alert.showAndWait();
+                }
+
+                if (newStartTime.isBefore(currentStartTime) & newEndTime.isAfter(currentEndTime)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Appointment Overlap");
+                    alert.setHeaderText("Appointment Error Overlap");
+                    alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
+                            " The appointment you overlap with is");
+                    alert.showAndWait();
+                }
+
+                if (newStartTime.isAfter(currentStartTime) || newStartTime.equals(currentStartTime) & (newEndTime.isBefore(currentEndTime) || newEndTime.equals(currentEndTime))) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Appointment Overlap");
+                    alert.setHeaderText("Appointment Error Overlap");
+                    alert.setContentText("The appointment you are trying to add overlaps with another appointment, please select a new time." +
+                            " The appointment you overlap with is");
+                    alert.showAndWait();
+                }
+            }
+        }
+
+        return true;
+
+
+    }
+
+
+
+}
+
+
+
+
+
+/*ZoneId currentZone = ZoneId.systemDefault();
+            ZoneId estZone = ZoneId.of("America/New_York");
+
+        Appointments appt = null;
+
+            ZonedDateTime startZoneDateTime = appt.getStartTime().atZone(estZone);
+            ZonedDateTime endZoneDateTime = appt.getEndTime().atZone(estZone);
+            int year = appt.getStartTime().toLocalDate().getYear();
+            int month = appt.getStartTime().toLocalDate().getMonth().getValue();
+            int day = appt.getStartTime().toLocalDate().getDayOfMonth();
+            int hourAM = 8;
+            int hourPM = 22;
+            int min = 00;
+            int sec = 00;
+
+            LocalDateTime startZTime = LocalDateTime.of(year, month, day, hourAM, hourPM, min, sec);
+            LocalDateTime endZTime = LocalDateTime.of(year, month, day, hourAM, hourPM, min, sec);
+
+            ChronoZonedDateTime zonedStartTime = ZonedDateTime.of(startZTime, estZone);
+            ChronoZonedDateTime zonedEndTime = ZonedDateTime.of(endZTime, estZone);
+
+            System.out.println("ZonedStartTime: " + zonedStartTime);
+            System.out.println("Zone
+            if(dEndTime: " + zonedEndTime);
+
+            if (startZoneDateTime.isBefore(zonedStartTime) || endZoneDateTime.isAfter(zonedEndTime)) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Appointments");
+                alert.setHeaderText("Appointment is Outside of Office Hours");
+                alert.setContentText("Please enter a new Appointment time, office hours are between 8AM to 10PM EST.");
+                alert.showAndWait();
+
+                return false;
+
+        }*/
+
+
+/*
+ObservableList<Appointments> currentAppointments = FXCollections.observableArrayList();
+        currentAppointments = AppointmentsDB.getAllAppointments();
+
+
+        for (Appointments appointment : currentAppointments) {
+            LocalDate currentDate = appointment.getStartTime().toLocalDate();
+
+            if (addDate.getValue().isEqual(currentDate)) {
+                LocalTime currentStart = appointment.getStartTime().toLocalTime();
+                LocalTime currentEnd = appointment.getEndTime().toLocalTime();
+                LocalTime futureStart = LocalTime.parse(addStartTime.getText());
+                LocalTime futureEnd = LocalTime.parse(addEndTime.getText());
+
+                if (futureStart.isBefore(currentStart) & futureEnd.isAfter(currentEnd)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Appointment Error");
+                    alert.setHeaderText("Appointment Error");
+                    alert.setContentText("Appointment overlap, you can not schedule an appointment that overlaps with another customers appointment." +
+                            " The appointment you overlap with is");
+                    alert.showAndWait();
+                    return false;
+                }
+                if (futureStart.isBefore(currentEnd) & futureEnd.isAfter(currentEnd)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Appointment overlap");
+                    alert.setHeaderText("Appointment overlap");
+                    alert.setContentText("Appointment overlap, you can not schedule an appointment that overlaps with another customers appointment." +
+                            " The appointment you overlap with is");
+                    alert.showAndWait();
+                    return false;
+                }
+                if ((futureStart.isAfter(currentStart) || futureStart.equals(currentStart)) & (futureEnd.isBefore(currentEnd) || futureEnd.equals(currentEnd))) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Appointment overlap");
+                    alert.setHeaderText("Appointment overlap");
+                    alert.setContentText("Appointment overlap, you can not schedule an appointment that overlaps with another customers appointment." +
+                            " The appointment you overlap with is");
+                    alert.showAndWait();
+                    return false;
+                }
+
+ */
+
+/*
+public boolean onAddSaveButton(ActionEvent event) throws IOException {
+
+
+        int apptId = 0;
+        String title = addTitle.getText();
+        System.out.println("title =" + title);
+        String description = addDescription.getText();
+        System.out.println("description = " + description);
+        String location = addLocation.getText();
+        System.out.println("location = " + location);
+
+        Contacts contact = addContact.getValue();
+        //System.out.println("Type = " + type + " Contact = " + contact.getContactId());
+        String type = addApptType.getValue();
+
+        LocalDate date = addDate.getValue();
+        LocalTime startTime = LocalTime.parse(addStartTime.getText());
+        LocalTime endTime = LocalTime.parse(addEndTime.getText());
+        System.out.println("date = " + date + " time = " + startTime);
+        LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+        System.out.println("Date time is " + startDateTime);
+        LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+        Customers customer = addCustomerId.getValue();
+        Users user = addUserId.getValue();
+
+
+        if (addTitle.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Title can not be blank");
+            alert.show();
+            return false;
+        }
+
+        if (addDescription.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Description can not be blank");
+            alert.show();
+            return false;
+        }
+
+        if (addLocation.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Title can not be blank");
+            alert.show();
+            return false;
+        }
+
+        if (addContact.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose a Contact");
+            alert.show();
+            return false;
+        }
+
+        if (addApptType.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose an Appointment type");
+            alert.show();
+            return false;
+        }
+
+        if (addCustomerId.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose a Customer ID");
+            alert.show();
+            return false;
+        }
+
+        if (addUserId.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Please choose a User ID");
+            alert.show();
+            return false;
+
+        }
+
+        else {
+
+                Appointments newAppointment = new Appointments(apptId, title, description, location, contact.getContactId(), type, startDateTime, endDateTime, customer.getCustomerID(), user.getUserId());
+                AppointmentsDB.addAppointment(newAppointment);
+
+                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                Parent scene = FXMLLoader.load(getClass().getResource("/View/AppointmentsScreen.fxml"));
+                stage.setScene(new Scene(scene));
+                stage.show();
+
+            }
+
+
+        return false;
+    }
+ */
+
 
