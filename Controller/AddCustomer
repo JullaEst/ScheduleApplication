@@ -1,1 +1,153 @@
+package Controller;
 
+import DBAccess.CountryDB;
+import DBAccess.CustomersDB;
+import DBAccess.DivisionsDB;
+import Model.Country;
+import Model.Customers;
+import Model.Divisions;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class AddCustomer implements Initializable {
+
+    public TextField addName;
+    public TextField addAddress;
+    public TextField addZipCode;
+    public TextField addPhoneNumber;
+    public ComboBox <Divisions> addDivisionId;
+    public ComboBox <Country>addCountryId;
+
+    public Button saveButton;
+    public Button cancelButton;
+    public TextField addCustomerId;
+
+    public void onAddName(ActionEvent event) {
+    }
+
+    public void onAddAddress(ActionEvent event) {
+    }
+
+    public void onAddZipCode(ActionEvent event) {
+    }
+
+    public void onAddPhoneNumber(ActionEvent event) {
+    }
+
+    public void onAddDivisionId(ActionEvent event) {
+        /*Divisions selectedDivision = addDivisionId.getValue();
+        addDivisionId.setItems(DivisionsDB.getAllDivisions(selectedDivision.getDivisionId()));
+        */
+
+    }
+
+    public void onAddCountryId(ActionEvent event) {
+        Country selectedCountry = addCountryId.getValue();
+        addDivisionId.setItems(DivisionsDB.getAllDivisions(selectedCountry.getCountryId()));
+
+
+    }
+
+    public void onSaveButton(ActionEvent event) throws IOException {
+        int customerId = 0;
+        String name = addName.getText();
+        System.out.println("name = " + name);
+        String address = addAddress.getText();
+        System.out.println("address = " + address);
+        String zipcode = addZipCode.getText();
+        System.out.println("zipcode = " + zipcode);
+        String phoneNumber = addPhoneNumber.getText();
+        System.out.println("phone number = " + phoneNumber);
+
+        Divisions divisionId = addDivisionId.getValue();
+        System.out.println("Division Id = " + divisionId);
+
+        Country countryId = addCountryId.getValue();
+        System.out.println("country id = " + countryId);
+
+        if(addName.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Name can not be blank");
+            alert.show();
+            return;
+        }
+
+        if(addAddress.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Address can not be blank");
+            alert.show();
+            return;
+        }
+
+        if(addZipCode.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Zip code can not be blank");
+            alert.show();
+            return;
+        }
+
+        if(addPhoneNumber.getText().isBlank()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Phone Number can not be blank");
+            alert.show();
+            return;
+
+        } else {
+            Customers newCustomer = new Customers(0,name, address, zipcode, phoneNumber, divisionId.getDivisionId(), countryId.getCountryId());
+            CustomersDB.addCustomer(newCustomer);
+
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+            Parent scene = FXMLLoader.load(getClass().getResource("/View/CustomerScreen.fxml"));
+            stage.setScene(new Scene(scene));
+            stage.show();
+        }
+    }
+
+
+    //cancels Customer addition and redirects back to Customer Screen
+    public void onCancelButton(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Do you want to ignore your changes?",
+                ButtonType.OK,
+                ButtonType.CANCEL);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                Parent addCustomer = null;
+
+                try {
+                    addCustomer = FXMLLoader.load(getClass().getResource("/View/CustomerScreen.fxml"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Scene partScene = new Scene(addCustomer);
+
+                Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+                window.setScene(partScene);
+                window.show();
+
+            }
+
+        });
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        //addDivisionId.setItems(DivisionsDB.getAllDivisions());
+        addCountryId.setItems(CountryDB.getAllCountry());
+    }
+
+    public void onAddCustomerId(ActionEvent event) {
+    }
+}
