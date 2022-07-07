@@ -4,17 +4,17 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="446.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LogIn">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="446.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.LogIn">
     <children>
-        <Button fx:id="loginButton" layoutX="146.0" layoutY="282.0" mnemonicParsing="false" onAction="#onActionButton" prefHeight="26.0" prefWidth="46.0" text="Login" />
-        <Button fx:id="exitButton" layoutX="217.0" layoutY="282.0" mnemonicParsing="false" onAction="#onExitButton" prefHeight="26.0" prefWidth="46.0" text="Exit" />
-        <Label layoutX="169.0" layoutY="53.0" prefHeight="44.0" prefWidth="71.0" text="Login">
+        <Button fx:id="loginButton" layoutX="133.0" layoutY="282.0" mnemonicParsing="false" onAction="#onLoginButton" prefHeight="26.0" prefWidth="71.0" text="Login" />
+        <Button fx:id="exitButton" layoutX="217.0" layoutY="282.0" mnemonicParsing="false" onAction="#onExitButton" prefHeight="26.0" prefWidth="71.0" text="Exit" />
+        <Label fx:id="loginLabel" layoutX="169.0" layoutY="53.0" prefHeight="44.0" prefWidth="71.0" text="Login">
             <font>
                 <Font name="Dubai Light" size="24.0" />
             </font>
         </Label>
-        <TextField fx:id="usernameText" layoutX="134.0" layoutY="147.0" promptText="Username" />
-        <TextField fx:id="passwordText" layoutX="134.0" layoutY="187.0" promptText="Password" />
-      <TextField fx:id="userLocation" layoutX="134.0" layoutY="234.0" promptText="Zone ID" />
+        <TextField fx:id="usernameText" alignment="TOP_LEFT" layoutX="134.0" layoutY="147.0" onAction="#onUserNameText" promptText="Username" />
+        <TextField fx:id="passwordText" layoutX="134.0" layoutY="187.0" onAction="#onPasswordText" promptText="Password" />
+      <TextField fx:id="userLocation" layoutX="134.0" layoutY="234.0" onAction="#onZoneId" promptText="Zone ID" />
     </children>
 </AnchorPane>
