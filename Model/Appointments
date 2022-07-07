@@ -1,1 +1,99 @@
+package Model;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+
+/**
+ * Appointment Class creates appointment objects and assigns values to object
+ */
+
+public class Appointments {
+
+    private ObservableList<Appointments> NewAppointment = FXCollections.observableArrayList();
+
+    private ObservableList<Appointments> selectedAppt = FXCollections.observableArrayList();
+
+    private static final ObservableList<Appointments> allAppointments = FXCollections.observableArrayList();
+
+    private int ApptId;
+    private String Title;
+    private String Description;
+    private String Location;
+    private int Contact;
+    private String ApptType;
+    private LocalDateTime StartTime;
+    private LocalDateTime EndTime;
+    private int CustomerId;
+    private int UserId;
+
+    //appointment types
+    public static final ObservableList<String> typesList = FXCollections.observableArrayList("Planning Session", "De-Briefing", "Status Update", "Problem-Solving");
+
+    public Appointments(int ApptId, String Title, String Description, String Location, int Contact, String ApptType, LocalDateTime StartTime, LocalDateTime EndTime, int CustomerId, int UserId) {
+        this.ApptId = ApptId;
+        this.Title = Title;
+        this.Description = Description;
+        this.Location = Location;
+        this.Contact = Contact;
+        this.ApptType = ApptType;
+        this.StartTime = StartTime;
+        this.EndTime = EndTime;
+        this.CustomerId = CustomerId;
+        this.UserId = UserId;
+    }
+
+    /*public Appointments(int apptId, String title, String description, String location, int contactId, String type, ZonedDateTime startZoneDateTime, ZonedDateTime endZoneDateTime, int customerID, int userId) {
+    }*/
+
+    //gets appt id
+    public Integer getApptId() {
+        return ApptId;
+    }
+    //gets title
+    public String getTitle() {
+        return Title;
+    }
+    //gets description
+    public String getDescription() {
+        return Description;
+    }
+    //gets location
+    public String getLocation() {
+        return Location;
+    }
+    //gets contact
+    public Integer getContact() {
+        return Contact;
+    }
+    //gets appt type
+    public String getApptType() {
+        return ApptType;
+    }
+    //gets date
+    public LocalDate getDate() {
+        return StartTime.toLocalDate();
+    }
+    //gets start time
+    public LocalDateTime getStartTime() {
+        return StartTime;
+    }
+    //gets end time
+    public LocalDateTime getEndTime() {
+        return EndTime;
+    }
+    //gets customer id
+    public int getCustomerId() {
+        return CustomerId;
+    }
+    //gets user id
+    public int getUserId() {
+        return UserId;
+    }
+
+}
+
 
