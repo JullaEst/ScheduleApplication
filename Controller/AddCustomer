@@ -19,6 +19,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller contains class and methods for the user to add customers.
+ */
+
 public class AddCustomer implements Initializable {
 
     public TextField addName;
@@ -58,6 +62,7 @@ public class AddCustomer implements Initializable {
 
     }
 
+    //saves new customer information
     public void onSaveButton(ActionEvent event) throws IOException {
         int customerId = 0;
         String name = addName.getText();
@@ -75,27 +80,28 @@ public class AddCustomer implements Initializable {
         Country countryId = addCountryId.getValue();
         System.out.println("country id = " + countryId);
 
+        //Error pop up if Name is blank
         if(addName.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Name can not be blank");
             alert.show();
             return;
         }
-
+        //Error pop up if Address is blank
         if(addAddress.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Address can not be blank");
             alert.show();
             return;
         }
-
+        //Error pop up if Zipcode is blank
         if(addZipCode.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Zip code can not be blank");
             alert.show();
             return;
         }
-
+        //Error pop up if Phone number is blank
         if(addPhoneNumber.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Phone Number can not be blank");
@@ -103,6 +109,7 @@ public class AddCustomer implements Initializable {
             return;
 
         } else {
+            //creates new customer and redirects to Customer screen
             Customers newCustomer = new Customers(0,name, address, zipcode, phoneNumber, divisionId.getDivisionId(), countryId.getCountryId());
             CustomersDB.addCustomer(newCustomer);
 
@@ -131,9 +138,7 @@ public class AddCustomer implements Initializable {
                 }
 
                 Scene partScene = new Scene(addCustomer);
-
                 Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
                 window.setScene(partScene);
                 window.show();
 
@@ -151,3 +156,4 @@ public class AddCustomer implements Initializable {
     public void onAddCustomerId(ActionEvent event) {
     }
 }
+
