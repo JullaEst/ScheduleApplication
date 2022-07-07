@@ -2,16 +2,17 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="593.0" prefWidth="501.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.AddAppointment">
+<AnchorPane prefHeight="593.0" prefWidth="501.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.AddAppointment">
     <children>
         <Label layoutX="191.0" layoutY="29.0" text="Add Appointment" />
-        <Button layoutX="178.0" layoutY="565.0" mnemonicParsing="false" text="Save" />
-        <Button layoutX="274.0" layoutY="565.0" mnemonicParsing="false" text="Cancel" />
+        <Button fx:id="addSaveButton" layoutX="178.0" layoutY="565.0" mnemonicParsing="false" onAction="#onAddSaveButton" text="Save" />
+        <Button fx:id="addCancelButton" layoutX="274.0" layoutY="565.0" mnemonicParsing="false" onAction="#onCancelButton" text="Cancel" />
         <GridPane layoutX="60.0" layoutY="74.0" prefHeight="449.0" prefWidth="347.0">
             <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="407.0" minWidth="10.0" prefWidth="110.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="665.0" minWidth="10.0" prefWidth="244.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="407.0" minWidth="10.0" prefWidth="154.4" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="665.0" minWidth="10.0" prefWidth="191.99999999999997" />
             </columnConstraints>
             <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -38,18 +39,28 @@
                 <Label text="End Time" GridPane.rowIndex="8" />
                 <Label text="Customer ID" GridPane.rowIndex="9" />
                 <Label text="User ID" GridPane.rowIndex="10" />
-                <DatePicker prefHeight="26.0" prefWidth="161.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                <TextField GridPane.columnIndex="1" />
-                <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <TextField GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <TextField GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <TextField promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                <TextField promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                <ComboBox prefHeight="28.0" prefWidth="164.0" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                <ComboBox prefHeight="28.0" prefWidth="166.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                <ComboBox prefHeight="28.0" prefWidth="164.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                <ComboBox prefHeight="28.0" prefWidth="164.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <DatePicker fx:id="addDate" onAction="#onAddDate" prefHeight="26.0" prefWidth="161.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <TextField fx:id="addApptID" editable="false" onAction="#onAddApptId" prefHeight="26.0" prefWidth="209.0" promptText="ID - Auto Gen." GridPane.columnIndex="1">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font></TextField>
+                <TextField fx:id="addTitle" onAction="#onAddTitle" prefHeight="26.0" prefWidth="202.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextField fx:id="addDescription" onAction="#onAddDescription" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <TextField fx:id="addLocation" onAction="#onAddLocation" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <TextField fx:id="addStartTime" onAction="#onAddStartTime" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="7">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font></TextField>
+                <TextField fx:id="addEndTime" onAction="#onAddEndTime" promptText="HH:mm" GridPane.columnIndex="1" GridPane.rowIndex="8">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font></TextField>
+                <ComboBox fx:id="addCustomerId" onAction="#onAddCustomerID" prefHeight="28.0" prefWidth="164.0" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                <ComboBox fx:id="addUserId" onAction="#onAddUserId" prefHeight="28.0" prefWidth="166.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                <ComboBox fx:id="addContact" onAction="#onAddContact" prefHeight="28.0" prefWidth="164.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <ComboBox fx:id="addApptType" onAction="#onAddApptType" prefHeight="28.0" prefWidth="164.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             </children>
         </GridPane>
     </children>
 </AnchorPane>
+
