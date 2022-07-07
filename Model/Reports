@@ -1,1 +1,28 @@
+package Model;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+/**
+ * Reports Class creates report objects and assigns values to object
+ */
+public class Reports {
+
+    private String apptType;
+    private int countTotal;
+
+    public Reports(String apptType, int countTotal) {
+        this.apptType = apptType;
+        this.countTotal = countTotal;
+    }
+
+//gets appt type
+    public String getApptType(){
+        return apptType;
+    }
+
+    public Integer getCountTotal(){
+        return countTotal;
+    }
+
+}
 
