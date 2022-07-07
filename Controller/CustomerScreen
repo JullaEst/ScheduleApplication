@@ -56,6 +56,7 @@ public class CustomerScreen implements Initializable {
     //Edit Button directs user to the Edit Customer screen
     public void onEditButton(ActionEvent event) throws IOException, SQLException {
 
+        //selects customer to edit
         if(viewCustomerList.getSelectionModel().getSelectedItem() != null) {
             Customers selectedCustomer;
             selectedCustomer = viewCustomerList.getSelectionModel().getSelectedItem();
@@ -130,3 +131,4 @@ public class CustomerScreen implements Initializable {
 
     }
 }
+
