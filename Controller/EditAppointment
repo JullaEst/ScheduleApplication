@@ -29,6 +29,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+/**
+ * Controller contains class and methods for the user to edit appointments.
+ * The Controller also validates if the appointment is outside office hours
+ * or overlapping with existing appointments.
+ */
 public class EditAppointment implements Initializable {
 
     public DatePicker editDate;
@@ -87,7 +92,7 @@ public class EditAppointment implements Initializable {
     public void onEditUserId(ActionEvent event) {
     }
 
-
+    //selected appointment modifications are saved
     public void onSaveButton(ActionEvent event) throws IOException {
 
         int apptId = Integer.parseInt(editApptId.getText());
@@ -100,7 +105,6 @@ public class EditAppointment implements Initializable {
 
         Contacts contact = editContact.getValue();
         int contactId = contact.getContactId();
-
         //System.out.println("Type = " + type + " Contact = " + contact.getContactId());
         String type = editApptType.getValue();
         LocalDate date = editDate.getValue();
@@ -110,12 +114,11 @@ public class EditAppointment implements Initializable {
         LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
         System.out.println("Date time is " + startDateTime);
         LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
-
         Customers customer = editCustomerId.getValue();
         Users user = editUserId.getValue();
 
         try {
-            if (validateAppointment()) {
+            if (validateAppointment()) { //if form is filled correctly the modified appointment will be made and appear on Appointment Screen
 
                 Appointments modAppointment = new Appointments(apptId, title, description, location, contact.getContactId(), type, startDateTime, endDateTime, customer.getCustomerID(), user.getUserId());
                 AppointmentsDB.editAppointment(modAppointment);
@@ -131,7 +134,7 @@ public class EditAppointment implements Initializable {
         }
 
     }
-
+    //user can cancel appointment modifications and directs back to Appoinment screen
     public void onCancelButton(ActionEvent event) throws IOException {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Do you want to ignore your changes?",
                 ButtonType.OK,
@@ -148,19 +151,16 @@ public class EditAppointment implements Initializable {
                 }
 
                 Scene partScene = new Scene(editAppointment);
-
                 Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
                 window.setScene(partScene);
                 window.show();
-
             }
 
         });
     }
 
     public void sendAppt(Appointments appointmentSelected) {
-
+        //sends selected appointment information to edit
         editApptId.setText(String.valueOf(appointmentSelected.getApptId()));
         editTitle.setText(String.valueOf(appointmentSelected.getTitle()));
         editDescription.setText(String.valueOf(appointmentSelected.getDescription()));
@@ -176,18 +176,19 @@ public class EditAppointment implements Initializable {
         editStartTime.setText(appointmentSelected.getStartTime().toLocalTime().format(dtf));
         editEndTime.setText(appointmentSelected.getEndTime().toLocalTime().format(dtf));
 
+        //gets contacts list from combobox to select a contact
         for (Contacts c : editContact.getItems()) {
             if (c.getContactId() == appointmentSelected.getContact()) {
                 editContact.setValue(c);
             }
         }
-
+        //gets customers list from combobox to select a customer
         for (Customers cs : editCustomerId.getItems()) {
             if (cs.getCountryID() == appointmentSelected.getContact()) {
                 editCustomerId.setValue(cs);
             }
         }
-
+        //gets users list from combobox to select a user
         for (Users u : editUserId.getItems()) {
             if (u.getUserId() == appointmentSelected.getUserId()) {
                 editUserId.setValue(u);
@@ -195,10 +196,9 @@ public class EditAppointment implements Initializable {
         }
 
     }
-
+    //Sets initial conditions of the columns in the table view and prepopulates comboboxes
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         editApptType.setItems(Appointments.typesList);
         editContact.setItems(ContactsDB.getAllContacts());
         editCustomerId.setItems(CustomersDB.getAllCustomers());
@@ -217,38 +217,38 @@ public class EditAppointment implements Initializable {
             exception.printStackTrace();
         }*/
     }
-
+    //checks if form is filled correctly
     private boolean validateAppointment() {
 
-
+        //Error pop up if Title is blank
         if (editTitle.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Title can not be blank");
             alert.show();
             return false;
         }
-
+        //Error pop up if Location is blank
         if (editLocation.getText().isBlank()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Title can not be blank");
             alert.show();
             return false;
         }
-
+        //Error pop up if Contact is blank
         if (editContact.getValue() == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Please choose a Contact");
             alert.show();
             return false;
         }
-
+        //Error pop up if Appointment Type is blank
         if (editApptType.getValue() == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Please choose an Appointment type");
             alert.show();
             return false;
         }
-
+        //Error pop up if Customer is not selected
         Customers customer = editCustomerId.getValue();
         if (customer == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -256,7 +256,7 @@ public class EditAppointment implements Initializable {
             alert.show();
             return false;
         }
-
+        //Error pop up if User is not selected
         if (editUserId.getValue() == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Please choose a User ID");
@@ -264,9 +264,10 @@ public class EditAppointment implements Initializable {
             return false;
 
         }
+
+        //checks if appointment is outside of office hours
         LocalDate localStartDate = editDate.getValue();
         LocalDate localEndDate = editDate.getValue();
-
         DateTimeFormatter minHourFormat = DateTimeFormatter.ofPattern("HH:mm");
 
         LocalTime localStartTime = LocalTime.parse(editStartTime.getText(), minHourFormat);
@@ -294,7 +295,7 @@ public class EditAppointment implements Initializable {
             return false;
         }
 
-        //overlap appointment
+        //checks if appointments overlaps with other appointments
         ObservableList<Appointments> currentApptList = FXCollections.observableArrayList();
         currentApptList = AppointmentsDB.getAllAppointments();
         int apptID = Integer.parseInt(editApptId.getText());
@@ -306,7 +307,7 @@ public class EditAppointment implements Initializable {
                 continue; //ends the current iteration in a loop and continues to the next iteration
             }
 
-
+            //alert pop up if there is an appointment overlap
             if (dateTimeStart.isBefore(appointment.getStartTime()) && dateTimeEnd.isAfter(appointment.getEndTime())) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Appointment Overlap");
@@ -355,4 +356,3 @@ public class EditAppointment implements Initializable {
         return true;
     }
 }
-
