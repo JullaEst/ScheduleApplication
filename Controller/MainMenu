@@ -22,7 +22,13 @@ public class MainMenu {
     public Button reportsButton;
     public Button exitButton;
 
+    /**
+     * This controller is a menu that directs user to the Appointment screen, Customers screen, Reports screen, and user can exit program.
+     * @param event
+     * @throws IOException
+     */
 
+    //directs user to Appointment screen
     public void onCalendarAction(ActionEvent event) throws IOException {
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         Object scene = FXMLLoader.load(getClass().getResource("/View/AppointmentsScreen.fxml"));
@@ -30,21 +36,21 @@ public class MainMenu {
         stage.centerOnScreen();
         stage.show();
     }
-
+    //directs user to Customers screen
     public void onCustomersAction(ActionEvent actionEvent) throws IOException {
         Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
         Object scene = FXMLLoader.load(getClass().getResource("/View/CustomerScreen.fxml"));
         stage.setScene(new Scene((Parent) scene));
         stage.show();
     }
-
+    //directs user to Reports screen
     public void onReportsAction(ActionEvent actionEvent) throws IOException {
         Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
         Object scene = FXMLLoader.load(getClass().getResource("/View/ReportsScreen.fxml"));
         stage.setScene(new Scene((Parent) scene));
         stage.show();
     }
-
+    //directs user to exit program
     public void onExitAction(ActionEvent actionEvent) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Exit Confirmation");
